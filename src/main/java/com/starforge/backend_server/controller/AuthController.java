@@ -14,12 +14,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import java.util.UUID;
 
@@ -54,7 +57,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Alistamento Orbital — cadastrar novo piloto")
-    public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody CadastroRequest request) {
+    public ResponseEntity<EntityModel<UsuarioResponse>> registrar(@Valid @RequestBody CadastroRequest request) {
         if (usuarioRepository.existsByEmail(request.email())) {
             throw new RegraDeNegocioException("Email já cadastrado: " + request.email());
         }
@@ -68,9 +71,10 @@ public class AuthController {
         usuario.setStatus(StatusUsuario.ATIVO);
         usuarioRepository.save(usuario);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(),
-                        usuario.getStatus().name(), usuario.getRole().name(), usuario.getDataCadastro())
-        );
+        UsuarioResponse response = new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(),
+                usuario.getStatus().name(), usuario.getRole().name(), usuario.getDataCadastro());
+        return ResponseEntity.status(HttpStatus.CREATED).body(EntityModel.of(response,
+                linkTo(methodOn(UsuarioController.class).buscar(usuario.getId())).withRel("perfil"),
+                linkTo(methodOn(UsuarioController.class).resumo(usuario.getId())).withRel("resumo")));
     }
 }

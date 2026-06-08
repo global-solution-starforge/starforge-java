@@ -10,5 +10,6 @@ public record HangarResponse(
         String naveId,
         String naveNome,
         String contribuicaoId,
-        String missaoNome
+        String missaoNome,
+        String usuarioId
 ) {}

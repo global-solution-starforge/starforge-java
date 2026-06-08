@@ -66,7 +66,12 @@ public class HangarController {
     }
 
     private EntityModel<HangarResponse> toModel(HangarResponse r) {
-        return EntityModel.of(r,
-                linkTo(methodOn(HangarController.class).listarPorUsuario(r.contribuicaoId())).withRel("hangar-usuario"));
+        var model = EntityModel.of(r,
+                linkTo(methodOn(HangarController.class).listarPorUsuario(r.usuarioId())).withSelfRel(),
+                linkTo(methodOn(HangarController.class).listarPorUsuario(r.usuarioId())).withRel("hangar-usuario"));
+        if ("PENDENTE".equals(r.status())) {
+            model.add(linkTo(methodOn(HangarController.class).desbloquear(null)).withRel("desbloquear"));
+        }
+        return model;
     }
 }

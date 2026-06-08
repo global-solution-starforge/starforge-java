@@ -117,9 +117,12 @@ public class MissaoController {
     }
 
     private EntityModel<MissaoResponse> toModel(MissaoResponse r) {
-        return EntityModel.of(r,
+        var model = EntityModel.of(r,
                 linkTo(methodOn(MissaoController.class).buscar(r.id())).withSelfRel(),
                 linkTo(methodOn(MissaoController.class).progresso(r.id())).withRel("progresso"),
+                linkTo(methodOn(MissaoController.class).listarFases(r.id())).withRel("fases"),
+                linkTo(methodOn(NaveController.class).buscarPorMissao(r.id())).withRel("nave"),
                 linkTo(methodOn(MissaoController.class).listar()).withRel("missoes"));
+        return model;
     }
 }

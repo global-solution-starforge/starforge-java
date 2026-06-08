@@ -37,6 +37,7 @@ public class UsuarioController {
         UsuarioResponse response = usuarioService.criar(request);
         EntityModel<UsuarioResponse> model = EntityModel.of(response,
                 linkTo(methodOn(UsuarioController.class).buscar(response.id())).withSelfRel(),
+                linkTo(methodOn(UsuarioController.class).resumo(response.id())).withRel("resumo"),
                 linkTo(methodOn(UsuarioController.class).listar()).withRel("usuarios")
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(model);
@@ -73,6 +74,7 @@ public class UsuarioController {
         UsuarioResponse response = usuarioService.buscarPorId(id);
         EntityModel<UsuarioResponse> model = EntityModel.of(response,
                 linkTo(methodOn(UsuarioController.class).buscar(id)).withSelfRel(),
+                linkTo(methodOn(UsuarioController.class).resumo(id)).withRel("resumo"),
                 linkTo(methodOn(UsuarioController.class).listar()).withRel("usuarios")
         );
         return ResponseEntity.ok(model);
@@ -87,6 +89,7 @@ public class UsuarioController {
         UsuarioResponse response = usuarioService.atualizar(id, request);
         EntityModel<UsuarioResponse> model = EntityModel.of(response,
                 linkTo(methodOn(UsuarioController.class).buscar(id)).withSelfRel(),
+                linkTo(methodOn(UsuarioController.class).resumo(id)).withRel("resumo"),
                 linkTo(methodOn(UsuarioController.class).listar()).withRel("usuarios")
         );
         return ResponseEntity.ok(model);

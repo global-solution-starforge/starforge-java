@@ -79,8 +79,14 @@ public class ContribuicaoController {
     }
 
     private EntityModel<ContribuicaoResponse> toModel(ContribuicaoResponse r) {
-        return EntityModel.of(r,
+        var model = EntityModel.of(r,
+                linkTo(methodOn(ContribuicaoController.class).listarPorUsuario(r.usuarioId())).withSelfRel(),
                 linkTo(methodOn(ContribuicaoController.class).listarPorUsuario(r.usuarioId())).withRel("contribuicoes-usuario"),
-                linkTo(methodOn(ContribuicaoController.class).listarPorMissao(r.missaoId())).withRel("contribuicoes-missao"));
+                linkTo(methodOn(ContribuicaoController.class).listarPorMissao(r.missaoId())).withRel("contribuicoes-missao"),
+                linkTo(methodOn(MissaoController.class).buscar(r.missaoId())).withRel("missao"));
+        if (r.hangarId() != null) {
+            model.add(linkTo(methodOn(HangarController.class).listarPorUsuario(r.usuarioId())).withRel("hangar"));
+        }
+        return model;
     }
 }

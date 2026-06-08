@@ -60,17 +60,14 @@ public class HangarService {
     private HangarResponse toResponse(Hangar h) {
         String naveId = h.getNave() != null ? h.getNave().getId() : null;
         String naveNome = h.getNave() != null ? h.getNave().getNome() : null;
+        String contribuicaoId = h.getContribuicao() != null ? h.getContribuicao().getId() : null;
         String missaoNome = h.getContribuicao() != null && h.getContribuicao().getMissao() != null
                 ? h.getContribuicao().getMissao().getNome() : null;
+        String usuarioId = h.getContribuicao() != null && h.getContribuicao().getUsuario() != null
+                ? h.getContribuicao().getUsuario().getId() : null;
         return new HangarResponse(
-                h.getId(),
-                h.getStatus().name(),
-                h.getDataDesbloqueio(),
-                h.getNomeGravado(),
-                naveId,
-                naveNome,
-                h.getContribuicao() != null ? h.getContribuicao().getId() : null,
-                missaoNome
+                h.getId(), h.getStatus().name(), h.getDataDesbloqueio(),
+                h.getNomeGravado(), naveId, naveNome, contribuicaoId, missaoNome, usuarioId
         );
     }
 }
