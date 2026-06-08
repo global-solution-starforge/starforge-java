@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: starforge-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: DATASOURCE_URL
+        value: jdbc:oracle:thin:@//oracle.fiap.com.br:1521/orcl
+      - key: DATASOURCE_USERNAME
+        sync: false
+      - key: DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
