@@ -1,6 +1,22 @@
 package com.starforge.backend_server.database.model;
 
-import jakarta.persistence.*;
+import com.starforge.backend_server.database.model.embedded.Coordenadas;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -8,13 +24,17 @@ import java.util.List;
 
 @Entity
 @Table(name = "TB_MISSAO")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Missao {
 
     @Id
     @Column(name = "ID_MISSAO")
     private String id;
 
-    @Column(name = "CD_MISSAO")
+    @Column(name = "CD_MISSAO", unique = true)
     private String codigo;
 
     @Column(name = "NM_MISSAO")
@@ -43,11 +63,8 @@ public class Missao {
     @Column(name = "CG_UTIL_MISSAO")
     private String cargaUtil;
 
-    @Column(name = "COORD_LAT_MISSAO")
-    private Double latitude;
-
-    @Column(name = "COORD_LNG_MISSAO")
-    private Double longitude;
+    @Embedded
+    private Coordenadas coordenadas;
 
     @Column(name = "BADG_MISSAO")
     private String badge;
