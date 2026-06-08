@@ -1,5 +1,6 @@
 package com.starforge.backend_server.controller;
 
+import com.starforge.backend_server.database.model.Usuario;
 import com.starforge.backend_server.dto.usuario.UsuarioAtualizacaoRequest;
 import com.starforge.backend_server.dto.usuario.UsuarioCriacaoRequest;
 import com.starforge.backend_server.dto.usuario.UsuarioResponse;
@@ -12,7 +13,9 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -53,6 +56,7 @@ public class UsuarioController {
     @GetMapping("/{id}")
     @Operation(summary = "Buscar piloto por ID")
     public ResponseEntity<EntityModel<UsuarioResponse>> buscar(@PathVariable String id) {
+        verificarAcesso(id);
         UsuarioResponse response = usuarioService.buscarPorId(id);
         EntityModel<UsuarioResponse> model = EntityModel.of(response,
                 linkTo(methodOn(UsuarioController.class).buscar(id)).withSelfRel(),
@@ -66,6 +70,7 @@ public class UsuarioController {
     public ResponseEntity<EntityModel<UsuarioResponse>> atualizar(
             @PathVariable String id,
             @Valid @RequestBody UsuarioAtualizacaoRequest request) {
+        verificarAcesso(id);
         UsuarioResponse response = usuarioService.atualizar(id, request);
         EntityModel<UsuarioResponse> model = EntityModel.of(response,
                 linkTo(methodOn(UsuarioController.class).buscar(id)).withSelfRel(),
@@ -77,7 +82,18 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Desativar conta do piloto (soft delete)")
     public ResponseEntity<Void> deletar(@PathVariable String id) {
+        verificarAcesso(id);
         usuarioService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Permite acesso se o usuário autenticado for ADMIN ou se o id bater com o próprio id
+    private void verificarAcesso(String id) {
+        var autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        boolean isAdmin = autenticado.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin && !autenticado.getId().equals(id)) {
+            throw new AccessDeniedException("Acesso negado: você só pode acessar seus próprios dados.");
+        }
     }
 }
