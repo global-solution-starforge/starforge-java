@@ -1,5 +1,7 @@
 package com.starforge.backend_server.controller;
 
+import com.starforge.backend_server.dto.missao.FaseMissaoAtualizacaoRequest;
+import com.starforge.backend_server.dto.missao.FaseMissaoResponse;
 import com.starforge.backend_server.dto.missao.MissaoProgressoResponse;
 import com.starforge.backend_server.dto.missao.MissaoRequest;
 import com.starforge.backend_server.dto.missao.MissaoResponse;
@@ -87,6 +89,31 @@ public class MissaoController {
     public ResponseEntity<Void> deletar(@PathVariable String id) {
         missaoService.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/fases")
+    @Operation(summary = "Listar fases da missão")
+    public ResponseEntity<CollectionModel<EntityModel<FaseMissaoResponse>>> listarFases(@PathVariable String id) {
+        List<EntityModel<FaseMissaoResponse>> lista = missaoService.listarFases(id).stream()
+                .map(f -> EntityModel.of(f,
+                        linkTo(methodOn(MissaoController.class).listarFases(id)).withSelfRel(),
+                        linkTo(methodOn(MissaoController.class).buscar(id)).withRel("missao")))
+                .toList();
+        return ResponseEntity.ok(CollectionModel.of(lista,
+                linkTo(methodOn(MissaoController.class).listarFases(id)).withSelfRel()));
+    }
+
+    @PutMapping("/{id}/fases/{numeroFase}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Atualizar fase da missão")
+    public ResponseEntity<EntityModel<FaseMissaoResponse>> atualizarFase(
+            @PathVariable String id,
+            @PathVariable int numeroFase,
+            @Valid @RequestBody FaseMissaoAtualizacaoRequest request) {
+        FaseMissaoResponse response = missaoService.atualizarFase(id, numeroFase, request);
+        return ResponseEntity.ok(EntityModel.of(response,
+                linkTo(methodOn(MissaoController.class).listarFases(id)).withRel("fases"),
+                linkTo(methodOn(MissaoController.class).buscar(id)).withRel("missao")));
     }
 
     private EntityModel<MissaoResponse> toModel(MissaoResponse r) {

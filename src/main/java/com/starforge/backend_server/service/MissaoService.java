@@ -1,6 +1,7 @@
 package com.starforge.backend_server.service;
 
 import com.starforge.backend_server.database.model.Agencia;
+import com.starforge.backend_server.database.model.FaseMissao;
 import com.starforge.backend_server.database.model.Missao;
 import com.starforge.backend_server.database.model.Organizacao;
 import com.starforge.backend_server.database.model.StatusContribuicao;
@@ -8,8 +9,11 @@ import com.starforge.backend_server.database.model.StatusMissao;
 import com.starforge.backend_server.database.model.embedded.Coordenadas;
 import com.starforge.backend_server.database.repository.AgenciaRepository;
 import com.starforge.backend_server.database.repository.ContribuicaoRepository;
+import com.starforge.backend_server.database.repository.FaseMissaoRepository;
 import com.starforge.backend_server.database.repository.MissaoRepository;
 import com.starforge.backend_server.database.repository.OrganizacaoRepository;
+import com.starforge.backend_server.dto.missao.FaseMissaoAtualizacaoRequest;
+import com.starforge.backend_server.dto.missao.FaseMissaoResponse;
 import com.starforge.backend_server.dto.missao.MissaoProgressoResponse;
 import com.starforge.backend_server.dto.missao.MissaoRequest;
 import com.starforge.backend_server.dto.missao.MissaoResponse;
@@ -30,6 +34,7 @@ public class MissaoService {
     private final AgenciaRepository agenciaRepository;
     private final OrganizacaoRepository organizacaoRepository;
     private final ContribuicaoRepository contribuicaoRepository;
+    private final FaseMissaoRepository faseMissaoRepository;
 
     public List<MissaoResponse> listar() {
         return missaoRepository.findAll().stream().map(this::toResponse).toList();
@@ -71,6 +76,34 @@ public class MissaoService {
 
     public void deletar(String id) {
         missaoRepository.delete(buscarEntidade(id));
+    }
+
+    public List<FaseMissaoResponse> listarFases(String missaoId) {
+        buscarEntidade(missaoId);
+        return faseMissaoRepository.findByIdMissaoIdOrderByIdNumeroFase(missaoId).stream()
+                .map(this::toFaseResponse)
+                .toList();
+    }
+
+    public FaseMissaoResponse atualizarFase(String missaoId, int numeroFase, FaseMissaoAtualizacaoRequest request) {
+        FaseMissao fase = faseMissaoRepository.findByIdMissaoIdAndIdNumeroFase(missaoId, numeroFase)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException(
+                        "Fase " + numeroFase + " não encontrada na missão: " + missaoId));
+        fase.setNome(request.nome());
+        fase.setDescricao(request.descricao());
+        fase.setStatus(request.status());
+        fase.setPorcentagem(request.porcentagem());
+        return toFaseResponse(faseMissaoRepository.save(fase));
+    }
+
+    private FaseMissaoResponse toFaseResponse(FaseMissao f) {
+        return new FaseMissaoResponse(
+                f.getId().getNumeroFase(),
+                f.getNome(),
+                f.getDescricao(),
+                f.getStatus().name(),
+                f.getPorcentagem()
+        );
     }
 
     public Missao buscarEntidade(String id) {
