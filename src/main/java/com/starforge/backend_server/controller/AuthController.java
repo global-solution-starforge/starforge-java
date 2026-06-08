@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/v1/auth")
 @Tag(name = "Autenticação", description = "Registro e login de pilotos")
 public class AuthController {
 
@@ -46,10 +46,12 @@ public class AuthController {
         var usernamePassword = new UsernamePasswordAuthenticationToken(request.email(), request.senha());
         var auth = authenticationManager.authenticate(usernamePassword);
         var usuario = (Usuario) auth.getPrincipal();
-        return ResponseEntity.ok(new AuthResponse(tokenService.generateToken(usuario)));
+        return ResponseEntity.ok(new AuthResponse(
+                tokenService.generateToken(usuario)
+        ));
     }
 
-    @PostMapping("/register")
+    @PostMapping("/cadastro")
     @Operation(summary = "Alistamento Orbital — cadastrar novo piloto")
     public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody CadastroRequest request) {
         if (usuarioRepository.existsByEmail(request.email())) {

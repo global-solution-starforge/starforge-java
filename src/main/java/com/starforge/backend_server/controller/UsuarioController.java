@@ -20,7 +20,7 @@ import java.util.List;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @RestController
-@RequestMapping("/usuarios")
+@RequestMapping("/v1/usuarios")
 @RequiredArgsConstructor
 @Tag(name = "Usuários", description = "CRUD de pilotos da plataforma StarForge")
 public class UsuarioController {
