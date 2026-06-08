@@ -52,7 +52,7 @@ public class AuthController {
         ));
     }
 
-    @PostMapping("/cadastro")
+    @PostMapping("/register")
     @Operation(summary = "Alistamento Orbital — cadastrar novo piloto")
     public ResponseEntity<UsuarioResponse> registrar(@Valid @RequestBody CadastroRequest request) {
         if (usuarioRepository.existsByEmail(request.email())) {
@@ -64,7 +64,7 @@ public class AuthController {
         usuario.setNome(request.nome());
         usuario.setEmail(request.email());
         usuario.setSenhaHash(passwordEncoder.encode(request.senha()));
-        usuario.setRole(UserRole.USER);
+        usuario.setRole(request.role() != null ? request.role() : UserRole.USER);
         usuario.setStatus(StatusUsuario.ATIVO);
         usuarioRepository.save(usuario);
 
