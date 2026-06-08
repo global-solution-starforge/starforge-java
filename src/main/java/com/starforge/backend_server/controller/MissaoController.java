@@ -7,6 +7,9 @@ import com.starforge.backend_server.dto.missao.MissaoRequest;
 import com.starforge.backend_server.dto.missao.MissaoResponse;
 import com.starforge.backend_server.service.MissaoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,9 @@ public class MissaoController {
 
     @GetMapping
     @Operation(summary = "Listar todas as missões")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de missões retornada com sucesso")
+    })
     public ResponseEntity<CollectionModel<EntityModel<MissaoResponse>>> listar() {
         List<EntityModel<MissaoResponse>> lista = missaoService.listar().stream()
                 .map(this::toModel)
@@ -41,6 +47,9 @@ public class MissaoController {
 
     @GetMapping("/ativas")
     @Operation(summary = "Listar missões ativas")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de missões ativas retornada com sucesso")
+    })
     public ResponseEntity<CollectionModel<EntityModel<MissaoResponse>>> listarAtivas() {
         List<EntityModel<MissaoResponse>> lista = missaoService.listarAtivas().stream()
                 .map(this::toModel)
@@ -52,13 +61,23 @@ public class MissaoController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar missão por ID")
-    public ResponseEntity<EntityModel<MissaoResponse>> buscar(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Missão encontrada"),
+            @ApiResponse(responseCode = "404", description = "Missão não encontrada")
+    })
+    public ResponseEntity<EntityModel<MissaoResponse>> buscar(
+            @Parameter(description = "ID da missão") @PathVariable String id) {
         return ResponseEntity.ok(toModel(missaoService.buscarPorId(id)));
     }
 
     @GetMapping("/{id}/progresso")
     @Operation(summary = "Progresso de arrecadação da missão")
-    public ResponseEntity<EntityModel<MissaoProgressoResponse>> progresso(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Progresso retornado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Missão não encontrada")
+    })
+    public ResponseEntity<EntityModel<MissaoProgressoResponse>> progresso(
+            @Parameter(description = "ID da missão") @PathVariable String id) {
         MissaoProgressoResponse response = missaoService.buscarProgresso(id);
         EntityModel<MissaoProgressoResponse> model = EntityModel.of(response,
                 linkTo(methodOn(MissaoController.class).progresso(id)).withSelfRel(),
@@ -69,6 +88,13 @@ public class MissaoController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Criar nova missão")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Missão criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "422", description = "Regra de negócio violada")
+    })
     public ResponseEntity<EntityModel<MissaoResponse>> criar(@Valid @RequestBody MissaoRequest request) {
         MissaoResponse response = missaoService.criar(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(toModel(response));
@@ -77,8 +103,15 @@ public class MissaoController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Atualizar missão")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Missão atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Missão não encontrada")
+    })
     public ResponseEntity<EntityModel<MissaoResponse>> atualizar(
-            @PathVariable String id,
+            @Parameter(description = "ID da missão") @PathVariable String id,
             @Valid @RequestBody MissaoRequest request) {
         return ResponseEntity.ok(toModel(missaoService.atualizar(id, request)));
     }
@@ -86,14 +119,26 @@ public class MissaoController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Remover missão")
-    public ResponseEntity<Void> deletar(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Missão removida com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Missão não encontrada")
+    })
+    public ResponseEntity<Void> deletar(
+            @Parameter(description = "ID da missão") @PathVariable String id) {
         missaoService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/fases")
     @Operation(summary = "Listar fases da missão")
-    public ResponseEntity<CollectionModel<EntityModel<FaseMissaoResponse>>> listarFases(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Fases retornadas com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Missão não encontrada")
+    })
+    public ResponseEntity<CollectionModel<EntityModel<FaseMissaoResponse>>> listarFases(
+            @Parameter(description = "ID da missão") @PathVariable String id) {
         List<EntityModel<FaseMissaoResponse>> lista = missaoService.listarFases(id).stream()
                 .map(f -> EntityModel.of(f,
                         linkTo(methodOn(MissaoController.class).listarFases(id)).withSelfRel(),
@@ -106,9 +151,16 @@ public class MissaoController {
     @PutMapping("/{id}/fases/{numeroFase}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Atualizar fase da missão")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Fase atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Missão ou fase não encontrada")
+    })
     public ResponseEntity<EntityModel<FaseMissaoResponse>> atualizarFase(
-            @PathVariable String id,
-            @PathVariable int numeroFase,
+            @Parameter(description = "ID da missão") @PathVariable String id,
+            @Parameter(description = "Número da fase") @PathVariable int numeroFase,
             @Valid @RequestBody FaseMissaoAtualizacaoRequest request) {
         FaseMissaoResponse response = missaoService.atualizarFase(id, numeroFase, request);
         return ResponseEntity.ok(EntityModel.of(response,

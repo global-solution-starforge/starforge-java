@@ -6,6 +6,9 @@ import com.starforge.backend_server.dto.contribuicao.ContribuicaoResponse;
 import com.starforge.backend_server.dto.contribuicao.ContribuicaoStatusRequest;
 import com.starforge.backend_server.service.ContribuicaoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,12 @@ public class ContribuicaoController {
 
     @PostMapping
     @Operation(summary = "Criar contribuição (gera entrada no Hangar automaticamente)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Contribuição criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "422", description = "Regra de negócio violada")
+    })
     public ResponseEntity<EntityModel<ContribuicaoResponse>> criar(@Valid @RequestBody ContribuicaoRequest request) {
         var autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         ContribuicaoResponse response = contribuicaoService.criar(autenticado.getId(), request);
@@ -40,7 +49,14 @@ public class ContribuicaoController {
 
     @GetMapping("/usuario/{id}")
     @Operation(summary = "Listar contribuições de um usuário")
-    public ResponseEntity<CollectionModel<EntityModel<ContribuicaoResponse>>> listarPorUsuario(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contribuições retornadas com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — apenas o próprio piloto ou ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
+    public ResponseEntity<CollectionModel<EntityModel<ContribuicaoResponse>>> listarPorUsuario(
+            @Parameter(description = "ID do usuário") @PathVariable String id) {
         verificarAcessoUsuario(id);
         List<EntityModel<ContribuicaoResponse>> lista = contribuicaoService.listarPorUsuario(id).stream()
                 .map(this::toModel)
@@ -52,7 +68,14 @@ public class ContribuicaoController {
     @GetMapping("/missao/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Listar contribuições de uma missão")
-    public ResponseEntity<CollectionModel<EntityModel<ContribuicaoResponse>>> listarPorMissao(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contribuições retornadas com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Missão não encontrada")
+    })
+    public ResponseEntity<CollectionModel<EntityModel<ContribuicaoResponse>>> listarPorMissao(
+            @Parameter(description = "ID da missão") @PathVariable String id) {
         List<EntityModel<ContribuicaoResponse>> lista = contribuicaoService.listarPorMissao(id).stream()
                 .map(this::toModel)
                 .toList();
@@ -63,8 +86,15 @@ public class ContribuicaoController {
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Atualizar status de uma contribuição")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Status atualizado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Contribuição não encontrada")
+    })
     public ResponseEntity<EntityModel<ContribuicaoResponse>> atualizarStatus(
-            @PathVariable String id,
+            @Parameter(description = "ID da contribuição") @PathVariable String id,
             @Valid @RequestBody ContribuicaoStatusRequest request) {
         return ResponseEntity.ok(toModel(contribuicaoService.atualizarStatus(id, request)));
     }

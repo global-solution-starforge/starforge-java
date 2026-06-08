@@ -5,6 +5,9 @@ import com.starforge.backend_server.dto.hangar.HangarDesbloquearRequest;
 import com.starforge.backend_server.dto.hangar.HangarResponse;
 import com.starforge.backend_server.service.HangarService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +32,14 @@ public class HangarController {
 
     @GetMapping("/usuario/{id}")
     @Operation(summary = "Listar hangar de um piloto")
-    public ResponseEntity<CollectionModel<EntityModel<HangarResponse>>> listarPorUsuario(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Hangar retornado com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — apenas o próprio piloto ou ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Piloto não encontrado")
+    })
+    public ResponseEntity<CollectionModel<EntityModel<HangarResponse>>> listarPorUsuario(
+            @Parameter(description = "ID do piloto") @PathVariable String id) {
         verificarAcessoUsuario(id);
         List<EntityModel<HangarResponse>> lista = hangarService.listarPorUsuario(id).stream()
                 .map(this::toModel)
@@ -40,6 +50,12 @@ public class HangarController {
 
     @PostMapping("/desbloquear")
     @Operation(summary = "Desbloquear nave no hangar")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Nave desbloqueada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "422", description = "Regra de negócio violada")
+    })
     public ResponseEntity<EntityModel<HangarResponse>> desbloquear(@Valid @RequestBody HangarDesbloquearRequest request) {
         var autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         HangarResponse response = hangarService.desbloquear(autenticado.getId(), request);
@@ -48,7 +64,14 @@ public class HangarController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Remover entrada do hangar")
-    public ResponseEntity<Void> deletar(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Entrada removida com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — apenas o próprio piloto ou ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Entrada do hangar não encontrada")
+    })
+    public ResponseEntity<Void> deletar(
+            @Parameter(description = "ID da entrada do hangar") @PathVariable String id) {
         var autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         boolean isAdmin = autenticado.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));

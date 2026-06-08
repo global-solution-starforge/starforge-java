@@ -11,6 +11,8 @@ import com.starforge.backend_server.dto.usuario.UsuarioResponse;
 import com.starforge.backend_server.exception.RegraDeNegocioException;
 import com.starforge.backend_server.service.TokenService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,10 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Login do piloto")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Autenticado com sucesso — JWT retornado"),
+            @ApiResponse(responseCode = "401", description = "Credenciais inválidas")
+    })
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(request.email(), request.senha());
         var auth = authenticationManager.authenticate(usernamePassword);
@@ -57,6 +63,11 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Alistamento Orbital — cadastrar novo piloto")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Piloto registrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "422", description = "Regra de negócio violada (ex: email já cadastrado)")
+    })
     public ResponseEntity<EntityModel<UsuarioResponse>> registrar(@Valid @RequestBody CadastroRequest request) {
         if (usuarioRepository.existsByEmail(request.email())) {
             throw new RegraDeNegocioException("Email já cadastrado: " + request.email());

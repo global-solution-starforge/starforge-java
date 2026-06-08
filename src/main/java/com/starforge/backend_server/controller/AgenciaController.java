@@ -4,6 +4,9 @@ import com.starforge.backend_server.dto.instituicao.InstituicaoRequest;
 import com.starforge.backend_server.dto.instituicao.InstituicaoResponse;
 import com.starforge.backend_server.service.AgenciaService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +31,9 @@ public class AgenciaController {
 
     @GetMapping
     @Operation(summary = "Listar agências")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista de agências retornada com sucesso")
+    })
     public ResponseEntity<CollectionModel<EntityModel<InstituicaoResponse>>> listar() {
         List<EntityModel<InstituicaoResponse>> lista = agenciaService.listar().stream()
                 .map(this::toModel).toList();
@@ -37,13 +43,25 @@ public class AgenciaController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Buscar agência por ID")
-    public ResponseEntity<EntityModel<InstituicaoResponse>> buscar(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Agência encontrada"),
+            @ApiResponse(responseCode = "404", description = "Agência não encontrada")
+    })
+    public ResponseEntity<EntityModel<InstituicaoResponse>> buscar(
+            @Parameter(description = "ID da agência") @PathVariable String id) {
         return ResponseEntity.ok(toModel(agenciaService.buscarPorId(id)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Criar agência")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Agência criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "422", description = "Regra de negócio violada")
+    })
     public ResponseEntity<EntityModel<InstituicaoResponse>> criar(@Valid @RequestBody InstituicaoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(toModel(agenciaService.criar(request)));
     }
@@ -51,15 +69,30 @@ public class AgenciaController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Atualizar agência")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Agência atualizada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Agência não encontrada")
+    })
     public ResponseEntity<EntityModel<InstituicaoResponse>> atualizar(
-            @PathVariable String id, @Valid @RequestBody InstituicaoRequest request) {
+            @Parameter(description = "ID da agência") @PathVariable String id,
+            @Valid @RequestBody InstituicaoRequest request) {
         return ResponseEntity.ok(toModel(agenciaService.atualizar(id, request)));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Remover agência")
-    public ResponseEntity<Void> deletar(@PathVariable String id) {
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Agência removida com sucesso"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado"),
+            @ApiResponse(responseCode = "403", description = "Acesso negado — requer perfil ADMIN"),
+            @ApiResponse(responseCode = "404", description = "Agência não encontrada")
+    })
+    public ResponseEntity<Void> deletar(
+            @Parameter(description = "ID da agência") @PathVariable String id) {
         agenciaService.deletar(id);
         return ResponseEntity.noContent().build();
     }
