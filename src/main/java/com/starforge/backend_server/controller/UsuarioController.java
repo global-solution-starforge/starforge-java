@@ -4,6 +4,7 @@ import com.starforge.backend_server.database.model.Usuario;
 import com.starforge.backend_server.dto.usuario.UsuarioAtualizacaoRequest;
 import com.starforge.backend_server.dto.usuario.UsuarioCriacaoRequest;
 import com.starforge.backend_server.dto.usuario.UsuarioResponse;
+import com.starforge.backend_server.dto.usuario.UsuarioResumoResponse;
 import com.starforge.backend_server.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,6 +52,18 @@ public class UsuarioController {
                 .toList();
         return ResponseEntity.ok(CollectionModel.of(lista,
                 linkTo(methodOn(UsuarioController.class).listar()).withSelfRel()));
+    }
+
+    @GetMapping("/{id}/resumo")
+    @Operation(summary = "Resumo do piloto — total contribuído e missões apoiadas")
+    public ResponseEntity<EntityModel<UsuarioResumoResponse>> resumo(@PathVariable String id) {
+        verificarAcesso(id);
+        UsuarioResumoResponse response = usuarioService.buscarResumo(id);
+        EntityModel<UsuarioResumoResponse> model = EntityModel.of(response,
+                linkTo(methodOn(UsuarioController.class).resumo(id)).withSelfRel(),
+                linkTo(methodOn(UsuarioController.class).buscar(id)).withRel("usuario")
+        );
+        return ResponseEntity.ok(model);
     }
 
     @GetMapping("/{id}")

@@ -1,12 +1,15 @@
 package com.starforge.backend_server.service;
 
+import com.starforge.backend_server.database.model.StatusContribuicao;
 import com.starforge.backend_server.database.model.StatusUsuario;
 import com.starforge.backend_server.database.model.UserRole;
 import com.starforge.backend_server.database.model.Usuario;
+import com.starforge.backend_server.database.repository.ContribuicaoRepository;
 import com.starforge.backend_server.database.repository.UsuarioRepository;
 import com.starforge.backend_server.dto.usuario.UsuarioAtualizacaoRequest;
 import com.starforge.backend_server.dto.usuario.UsuarioCriacaoRequest;
 import com.starforge.backend_server.dto.usuario.UsuarioResponse;
+import com.starforge.backend_server.dto.usuario.UsuarioResumoResponse;
 import com.starforge.backend_server.exception.EntidadeNaoEncontradaException;
 import com.starforge.backend_server.exception.RegraDeNegocioException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.util.UUID;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final ContribuicaoRepository contribuicaoRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioResponse criar(UsuarioCriacaoRequest request) {
@@ -70,6 +74,13 @@ public class UsuarioService {
         Usuario usuario = buscarEntidade(id);
         usuario.setStatus(StatusUsuario.INATIVO);
         usuarioRepository.save(usuario);
+    }
+
+    public UsuarioResumoResponse buscarResumo(String id) {
+        buscarEntidade(id);
+        var total = contribuicaoRepository.sumValorByUsuarioIdAndStatus(id, StatusContribuicao.CONFIRMADO);
+        var missoes = contribuicaoRepository.countMissoesDistinctByUsuarioIdAndStatus(id, StatusContribuicao.CONFIRMADO);
+        return new UsuarioResumoResponse(id, total, missoes);
     }
 
     public Usuario buscarEntidade(String id) {
