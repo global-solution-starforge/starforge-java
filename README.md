@@ -14,6 +14,18 @@
 
 ---
 
+## Integrantes
+
+| Nome | RM |
+|---|---|
+| Anna Clara Russo Luca | RM561928 |
+| Gabriel Duarte Maciel | RM565754 |
+| Gustavo Tavares da Silva | RM562827 |
+| Tiago Guedes da Costa | RM564731 |
+
+> **Turma:** 2TDSPW - FIAP 2026
+---
+
 ## Sumário
 
 - [Sobre o Projeto](#sobre-o-projeto)
@@ -24,7 +36,6 @@
 - [Instruções de Execução](#instruções-de-execução)
 - [Variáveis de Ambiente](#variáveis-de-ambiente)
 - [Segurança e Autenticação](#segurança-e-autenticação)
-- [Integrantes](#integrantes)
 
 ---
 
@@ -84,20 +95,6 @@ src/main/java/com/starforge/backend_server/
 └── service/          # Regras de negócio — 10 services
 ```
 
-### Diagrama de Entidades Principais
-
-```
-Agencia / Organizacao
-       └── Missao ──── FaseMissao
-                  └── Nave
-                        │
-               Tier ───┤
-                  └── Contribuicao ──── Hangar
-                              │
-                           Usuario
-```
-
----
 
 ## Documentação da API
 
@@ -228,7 +225,7 @@ Todos os endpoints utilizam o prefixo `/v1/`.
 
 ---
 
-### Opção 1 — Executar com Gradle (local)
+### Executar com Gradle (local)
 
 **1. Clone o repositório:**
 ```bash
@@ -245,26 +242,6 @@ cd starforge-java
 
 A API estará disponível em `http://localhost:8080`.
 
----
-
-### Opção 2 — Executar com Docker
-
-**1. Construir a imagem:**
-```bash
-docker build -t starforge-api .
-```
-
-**2. Executar o container:**
-```bash
-docker run -p 8080:8080 \
-  -e DATASOURCE_URL=jdbc:oracle:thin:@//HOST:1521/SERVICE \
-  -e DATASOURCE_USERNAME=seu_usuario \
-  -e DATASOURCE_PASSWORD=sua_senha \
-  -e JWT_SECRET=sua_chave_secreta \
-  starforge-api
-```
-
-A API estará disponível em `http://localhost:8080`.
 
 ---
 
@@ -344,16 +321,6 @@ A API utiliza autenticação baseada em **JWT (JSON Web Token)** com o algoritmo
 - Senhas armazenadas com hash BCrypt
 - CORS habilitado para integração com frontends externos
 
----
-
-## Integrantes
-
-| Nome | RM |
-|---|---|
-| Anna Clara Russo Luca | RM561928 |
-| Gabriel Duarte Maciel | RM565754 |
-| Gustavo Tavares da Silva | RM562827 |
-| Tiago Guedes da Costa | RM564731 |
 
 ---
 
