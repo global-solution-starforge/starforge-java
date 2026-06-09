@@ -51,7 +51,7 @@ A API gerencia o ciclo completo da plataforma: desde o alistamento de pilotos e 
 
 | Recurso | Link |
 |---|---|
-| Deploy (API) | `https://starforge-java.onrender.com/` |
+| Deploy (API) | `https://starforge-java.onrender.com` |
 | Vídeo de Apresentação | `Em breve` |
 | Documentação Swagger (local) | `http://localhost:8080/swagger-ui.html` |
 | API Docs JSON (local) | `http://localhost:8080/api-docs` |
@@ -83,16 +83,16 @@ O projeto segue uma arquitetura em camadas, organizada por responsabilidade:
 
 ```
 src/main/java/com/starforge/backend_server/
-├── config/           # Configurações globais (PasswordEncoder, etc.)
-├── controller/       # Camada REST — 9 controllers
+├── config/           # Configurações globais 
+├── controller/       # Camada REST 
 ├── database/
-│   ├── model/        # Entidades JPA (20+ classes + enums)
+│   ├── model/        # Entidades JPA 
 │   └── repository/   # Interfaces Spring Data JPA
 ├── dto/              # Data Transfer Objects por domínio
 ├── exception/        # Exceções customizadas
 ├── handler/          # Tratamento global de erros
-├── security/         # JWT filter, SecurityConfig, TokenService
-└── service/          # Regras de negócio — 10 services
+├── security/         # SecurityConfig, SecurityFilter
+└── service/          # Regras de negócio 
 ```
 
 
@@ -233,15 +233,10 @@ git clone https://github.com/global-solution-starforge/starforge-java.git
 cd starforge-java
 ```
 
-**2. Configure as variáveis de ambiente** (ver seção [Variáveis de Ambiente](#variáveis-de-ambiente)).
-
-**3. Execute a aplicação:**
+**2. Execute a aplicação:**
 ```bash
 ./gradlew bootRun
 ```
-
-A API estará disponível em `http://localhost:8080`.
-
 
 ---
 
@@ -249,22 +244,10 @@ A API estará disponível em `http://localhost:8080`.
 
 Após iniciar a aplicação, acesse:
 
+- **API disponível em:** `http://localhost:8080`
 - **Swagger UI:** `http://localhost:8080/swagger-ui.html`
-- **Health check (teste rápido):** `GET http://localhost:8080/v1/missoes/`
 
----
 
-## Variáveis de Ambiente
-
-| Variável | Descrição | Padrão (desenvolvimento) |
-|---|---|---|
-| `DATASOURCE_URL` | URL JDBC do banco de dados Oracle | `jdbc:oracle:thin:@//oracle.fiap.com.br:1521/orcl` |
-| `DATASOURCE_USERNAME` | Usuário do banco de dados | `rm561928` |
-| `DATASOURCE_PASSWORD` | Senha do banco de dados | — |
-| `JWT_SECRET` | Chave secreta para assinar tokens JWT | `starforge-jwt-secret-key` |
-| `PORT` | Porta em que a API vai subir | `8080` |
-
-> **Atenção:** Nunca exponha credenciais em repositórios públicos. Utilize variáveis de ambiente ou ferramentas de secrets management em produção.
 
 ---
 
@@ -295,31 +278,6 @@ A API utiliza autenticação baseada em **JWT (JSON Web Token)** com o algoritmo
 | **Público** | Sem autenticação — leitura de missões, naves, tiers, agências e organizações |
 | **Autenticado** | Requer JWT válido — operações do próprio piloto (hangar, contribuições, perfil) |
 | **ADMIN** | Requer JWT + role ADMIN — criação, edição e exclusão de recursos |
-
----
-
-## Informações Relevantes para Avaliação
-
-### Funcionalidades implementadas
-
-- **CRUD completo** para todas as entidades: Missões, Naves, Tiers, Agências, Organizações, Usuários
-- **Autenticação JWT** com controle de acesso por roles (ADMIN / USER)
-- **Sistema de contribuições** com múltiplos métodos de pagamento (PIX, Cartão, Boleto, Transferência)
-- **Hangar de naves** desbloqueáveis automaticamente via contribuição
-- **Fases de missão** com controle de status individualizado
-- **HATEOAS** — todas as respostas incluem links de navegação entre recursos relacionados
-- **Documentação OpenAPI** — Swagger UI disponível em `/swagger-ui.html`
-- **Soft delete** em usuários (desativação sem exclusão física)
-- **Deploy containerizado** via Docker com configuração para Render (`render.yaml`)
-
-### Padrões e boas práticas
-
-- Separação em camadas: Controller → Service → Repository
-- DTOs para todas as entradas e saídas da API
-- Tratamento global de exceções com respostas padronizadas
-- Validação de entrada com Bean Validation (`@Valid`)
-- Senhas armazenadas com hash BCrypt
-- CORS habilitado para integração com frontends externos
 
 
 ---
