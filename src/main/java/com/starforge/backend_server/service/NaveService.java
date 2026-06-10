@@ -10,6 +10,7 @@ import com.starforge.backend_server.exception.EntidadeNaoEncontradaException;
 import com.starforge.backend_server.exception.RegraDeNegocioException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -65,6 +66,7 @@ public class NaveService {
         return toResponse(naveRepository.save(nave));
     }
 
+    @Transactional
     public void deletar(String id) {
         naveRepository.delete(buscarEntidade(id));
     }

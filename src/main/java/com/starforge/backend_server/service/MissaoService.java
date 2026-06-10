@@ -20,6 +20,7 @@ import com.starforge.backend_server.dto.missao.MissaoResponse;
 import com.starforge.backend_server.exception.EntidadeNaoEncontradaException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -74,6 +75,7 @@ public class MissaoService {
         return toResponse(missaoRepository.save(missao));
     }
 
+    @Transactional
     public void deletar(String id) {
         missaoRepository.delete(buscarEntidade(id));
     }

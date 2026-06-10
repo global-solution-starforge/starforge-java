@@ -9,6 +9,7 @@ import com.starforge.backend_server.exception.EntidadeNaoEncontradaException;
 import com.starforge.backend_server.exception.RegraDeNegocioException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -46,6 +47,7 @@ public class HangarService {
         return toResponse(hangarRepository.save(hangar));
     }
 
+    @Transactional
     public void deletar(String id, String usuarioId, boolean isAdmin) {
         Hangar hangar = hangarRepository.findById(id)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Hangar não encontrado: " + id));
