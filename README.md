@@ -49,12 +49,13 @@ A API gerencia o ciclo completo da plataforma: desde o alistamento de pilotos e 
 
 ## Links do Projeto
 
-| Recurso | Link |
-|---|---|
-| Deploy (API) | `https://starforge-java.onrender.com` |
-| Vídeo de Apresentação | `Em breve` |
+| Recurso                      | Link |
+|------------------------------|---|
+| Deploy (API)                 | `https://starforge-java.onrender.com` |
+| Vídeo de Apresentação        | `https://youtu.be/TQRljiZfYuo` |
+| Vídeo Pitch                  | `https://youtu.be/4ADkytuLn3k` |
 | Documentação Swagger (local) | `http://localhost:8080/swagger-ui.html` |
-| API Docs JSON (local) | `http://localhost:8080/api-docs` |
+| API Docs JSON (local)        | `http://localhost:8080/api-docs` |
 
 ---
 
